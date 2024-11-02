@@ -1,0 +1,38 @@
+import { evaluate } from 'mathjs';
+
+// Check if value has operator
+export const valueHasOp = (value) => {
+    const operators = ['+', '-', '*', '/'];
+    return operators.some(op => value.includes(op));
+};
+
+// Check if expression is valid
+export const isValidExpression = (expression) => {
+    const regex = /^[0-9+\-*/×÷(). ]+$/; // Allow only valid characters
+    return regex.test(expression);
+};
+
+// Check for division by zero
+const hasDivisionByZero = (expression) => {
+    const regex = /\/\s*0/; // Regex to match any division by zero
+    return regex.test(expression);
+};
+
+// Calculate result
+export const calculateResult = (calValue) => {
+    if (!isValidExpression(calValue)) {
+        return ''; // Return empty string if invalid
+    }
+
+    if (hasDivisionByZero(calValue)) {
+        return 'undefined'; // Return a message or value for division by zero
+    }
+
+    try {
+        const sanitizedValue = calValue.replace(/×/g, '*').replace(/÷/g, '/');
+        const result = evaluate(sanitizedValue); // Use mathjs to evaluate
+        return result.toString();
+    } catch (error) {
+        return ''; // Return empty string if an error occurs
+    }
+};
