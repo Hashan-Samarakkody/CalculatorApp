@@ -1,11 +1,12 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, Keyboard } from "react-native"; // Import Keyboard API
 import { Ionicons, FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Button from "./components/Button";
 import Row from "./components/Row";
 import { valueHasOp, calculateResult } from './util/logic';
+import History from "./util/History"; // Import the History component
 
 export default function App() {
   const [calValue, setCalValue] = useState("");
@@ -14,13 +15,18 @@ export default function App() {
   const [isAnswer, setIsAnswer] = useState(false);
   const [cursorSel, setCursorSel] = useState({ end: 0, start: 0 });
   const [isCursorSel, setIsCursorSel] = useState(false);
-  const [lastParenthesis, setLastParenthesis] = useState('(');
+  const [history, setHistory] = useState([]); // State for calculation history
+  const [showHistory, setShowHistory] = useState(false); // State to toggle history view
 
   const ansColor = {
     color: isAnswer ? "orange" : "white",
   };
 
   useEffect(() => {
+    // Dismiss keyboard when the app starts
+    Keyboard.dismiss();
+
+    // If there's an operation in the value, calculate the preview value
     if (valueHasOp(calValue)) {
       let prevAns = calculateResult(calValue);
       setPreviewValue(`${prevAns}`);
@@ -42,7 +48,6 @@ export default function App() {
       setIsAnswer(false);
     }
 
-    // Check if the pressed button is "+/-"
     if (text === "+/-") {
       if (calValue) {
         const lastNumberMatch = calValue.match(/[-]?\d+(\.\d+)?$/);
@@ -59,6 +64,7 @@ export default function App() {
 
     let corrText = text === "X" ? "*" : text === "+/-" ? "-" : text;
 
+    // Handle percentage calculation for the last number
     if (text === "%") {
       if (calValue) {
         const lastNumber = calValue.split(/[\+\-\*\/]/).pop();
@@ -92,15 +98,23 @@ export default function App() {
   };
 
   const handleParenthesis = () => {
-    const newParenthesis = lastParenthesis === '(' ? '(' : ')';
-    setLastParenthesis(newParenthesis);
-    handlePress(newParenthesis);
+    // Count how many opening and closing parentheses are in the current calculation
+    const openParentheses = calValue.split("(").length - 1;
+    const closeParentheses = calValue.split(")").length - 1;
+
+    // If the number of open parentheses is greater than the number of closed ones, insert a closing parenthesis
+    if (openParentheses > closeParentheses) {
+      handlePress(")");
+    } else {
+      // Otherwise, insert an opening parenthesis
+      handlePress("(");
+    }
   };
 
   const handleClear = () => {
+    // Clear the calculation and reset parentheses state
     setCalValue("");
     setDisplayValue("");
-    setLastParenthesis('(');
   };
 
   const handleEqual = () => {
@@ -109,11 +123,32 @@ export default function App() {
     setCalValue(result);
     setDisplayValue(result.replace(/\*/g, '×').replace(/\//g, '÷'));
     setPreviewValue("");
+
+    // Save to history
+    setHistory((prev) => [...prev, { equation: calValue, answer: result }]);
     setIsAnswer(true);
   };
 
+  const toggleHistory = () => {
+    // Toggle history visibility
+    setShowHistory(!showHistory);
+  };
+
+  const clearHistory = () => {
+    // Clear calculation history
+    setHistory([]);
+  };
+
+  // Render the history component when the history view is active
+  if (showHistory) {
+    return (
+      <History history={history} clearHistory={clearHistory} goBack={toggleHistory} />
+    );
+  }
+
   return (
     <View style={styles.container}>
+      {/* Text input for displaying the current calculation */}
       <TextInput
         style={[styles.input, ansColor]}
         value={displayValue}
@@ -126,20 +161,27 @@ export default function App() {
           setIsCursorSel(true);
           setCursorSel(e.nativeEvent.selection);
         }}
-        showSoftInputOnFocus={false}
+        showSoftInputOnFocus={false} // Prevent the keyboard from showing
+        editable={false} // Disable text input editing
       />
+      {/* Text input for showing the preview of the result */}
       <TextInput
         value={previewValue}
         onChangeText={setPreviewValue}
         cursorColor='#8ad8d1'
         textAlign='right'
         caretHidden={true}
-        showSoftInputOnFocus={false}
+        showSoftInputOnFocus={false} // Prevent the keyboard from showing
         style={[styles.input, styles.prevInput]}
+        editable={false} // Disable text input editing
       />
 
+      {/* Backspace and history buttons */}
       <View style={styles.backButton}>
-        <Pressable onPress={handleBackSpace} disabled={!calValue}>
+        <Pressable onPress={toggleHistory}>
+          <Ionicons name='time' size={30} color="#505050" />
+        </Pressable>
+        <Pressable onPress={handleBackSpace} disabled={!calValue} style={styles.backspaceButton}>
           <Ionicons
             name='backspace'
             size={30}
@@ -150,6 +192,7 @@ export default function App() {
 
       <View style={styles.divider} />
 
+      {/* Button container for calculator */}
       <View style={styles.buttonContainer}>
         <Row>
           <Button handlePress={handleClear} label={"C"} type='operatorSecondary' />
@@ -204,23 +247,19 @@ export default function App() {
             handlePress={handlePress}
             label={"+"}
             type='operatorPrimary'
-            icon={<FontAwesome5 name='plus' size={21} />}
+            icon={<FontAwesome name='plus' size={21} />}
           />
         </Row>
         <Row>
-          <Button handlePress={handlePress} label={"+/-"} type='digit' />
+          <Button handlePress={handlePress} label={"+/-"} type='operatorSecondary' />
           <Button handlePress={handlePress} label={"0"} type='digit' />
           <Button handlePress={handlePress} label={"."} type='digit' />
-          <Button
-            handlePress={handleEqual}
-            label={"="}
-            type='equal'
-            icon={<FontAwesome5 name='equals' size={21} />}
-          />
+          <Button handlePress={handleEqual} label={"="} type='equals'
+            icon={<FontAwesome5 name='equals' size={21} />} />
         </Row>
       </View>
 
-      <StatusBar style='auto' />
+      <StatusBar style='light' />
     </View>
   );
 }
@@ -228,33 +267,43 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#010101",
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    backgroundColor: "#17171a",
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
   input: {
-    marginTop: 40,
-    borderWidth: 1,
-    padding: 10,
-    color: "#fff",
-    fontSize: 36,
+    height: 70,
+    color: "white",
+    width: "90%",
+    fontSize: 35,
+    textAlign: "right",
+    marginTop: 80,
   },
   prevInput: {
-    fontSize: 24,
-    marginTop: 40,
-    marginBottom: 30,
-    color: "#616161",
+    color: "gray",
+    fontSize: 25,
+    height: 50,
   },
   backButton: {
+    width: "90%",
+    paddingHorizontal: 20,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
   },
-  buttonContainer: {
-    flex: 4,
+  backspaceButton: {
+    paddingHorizontal: 20,
   },
   divider: {
-    height: 2,
-    backgroundColor: "#575757",
-    marginVertical: 20,
+    height: 1,
+    backgroundColor: "#333",
+    width: "90%",
+    marginVertical: 15,
+  },
+  buttonContainer: {
+    flex: 1,
+    width: "90%",
+    justifyContent: "flex-start",
   },
 });
