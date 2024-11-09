@@ -9,6 +9,7 @@ import { valueHasOp, calculateResult } from './util/logic';
 import History from "./util/History"; // Import the History component
 
 export default function App() {
+  // Declare state variables
   const [calValue, setCalValue] = useState("");
   const [displayValue, setDisplayValue] = useState("");
   const [previewValue, setPreviewValue] = useState("");
