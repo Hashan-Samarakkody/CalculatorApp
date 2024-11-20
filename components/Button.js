@@ -1,8 +1,13 @@
-import { TouchableHighlight, Text, StyleSheet } from "react-native";
+import { TouchableHighlight, Text, StyleSheet, Dimensions } from "react-native";
 import React from "react";
 
-const colorMapping = {
+// Get screen width
+const { width } = Dimensions.get('window');
 
+// Define dynamic button size based on screen width
+const BUTTON_SIZE = width < 350 ? 60 : 80; // Make buttons smaller on small screens
+
+const colorMapping = {
     equal: {
         backgroundColor: "orange",
         textColor: "#1C1C1C",
@@ -31,13 +36,13 @@ export default function Button({ label, type, handlePress, icon }) {
     return (
         <TouchableHighlight
             underlayColor={backgroundColor}
-            style={[styles.button, { backgroundColor }]}
+            style={[styles.button, { backgroundColor, width: BUTTON_SIZE, height: BUTTON_SIZE }]}
             onPress={() => handlePress(label)}
         >
             {icon ? (
                 React.cloneElement(icon, { color: iconColor }) // Set the icon color
             ) : (
-                <Text style={{ fontSize: 26, color: textColor, fontWeight: "bold" }}>
+                <Text style={{ fontSize: BUTTON_SIZE / 2, color: textColor, fontWeight: "bold" }}>
                     {label}
                 </Text>
             )}
@@ -47,10 +52,9 @@ export default function Button({ label, type, handlePress, icon }) {
 
 const styles = StyleSheet.create({
     button: {
-        borderRadius: 50,
-        width: 80,
-        height: 80,
+        borderRadius: 50, // Make button round
         alignItems: "center",
         justifyContent: "center",
+        margin: 5, // Add space between buttons
     },
 });
