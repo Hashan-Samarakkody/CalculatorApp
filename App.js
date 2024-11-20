@@ -252,10 +252,10 @@ export default function App() {
           />
         </Row>
         <Row>
-          <Button handlePress={handlePress} label={"+/-"} type='operatorSecondary' />
+          <Button handlePress={handlePress} label={"+/-"} type='digit' />
           <Button handlePress={handlePress} label={"0"} type='digit' />
           <Button handlePress={handlePress} label={"."} type='digit' />
-          <Button handlePress={handleEqual} label={"="} type='equals'
+          <Button handlePress={handleEqual} label={"="} type='equal'
             icon={<FontAwesome5 name='equals' size={21} />} />
         </Row>
       </View>
