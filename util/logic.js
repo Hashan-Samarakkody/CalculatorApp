@@ -8,6 +8,8 @@ export const valueHasOp = (value) => {
 
 // Check if expression is valid
 export const isValidExpression = (expression) => {
+    // Handle cases like ".5" by adding "0" before the decimal if needed
+    expression = expression.replace(/^(\.\d+)/, '0$1');
     const regex = /^[0-9+\-*/×÷(). ]+$/; // Allow only valid characters
     return regex.test(expression);
 };
