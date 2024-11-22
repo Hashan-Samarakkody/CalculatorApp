@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
         borderRadius: 50, // Make button round
         alignItems: "center",
         justifyContent: "center",
-        margin: 5, // Add space between buttons
+        margin: 1, // Add space between buttons
     },
 });
