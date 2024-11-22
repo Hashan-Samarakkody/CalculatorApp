@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     width: "90%",
     fontSize: 45,
     textAlign: "right",
-    marginTop: 85,
+    marginTop: 75,
   },
   prevInput: {
     color: "#757574",
@@ -287,25 +287,25 @@ const styles = StyleSheet.create({
   },
   backButton: {
     width: "95%",
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 0,
   },
   backspaceButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
   },
   divider: {
     height: 1,
     backgroundColor: "#333",
     width: "90%",
-    marginVertical: 35,
+    marginVertical: 25,
   },
   buttonContainer: {
     flex: 0.9,
     width: "95%",
-    marginBottom: 40,
+    marginBottom: 20,
     justifyContent: "flex-end",
   },
 });
