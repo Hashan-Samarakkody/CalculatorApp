@@ -1,32 +1,33 @@
-import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, TextInput, View, Keyboard, Dimensions, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, TextInput, View, Keyboard } from "react-native"; // Import Keyboard API
+import { Ionicons, FontAwesome5, FontAwesome } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Button from "./components/Button";
 import Row from "./components/Row";
 import { valueHasOp, calculateResult } from './util/logic';
-import History from "./util/History";
-
-const { width, height } = Dimensions.get('window'); // Get screen dimensions
-
-const screenRatio = width / height; // Calculate the screen ratio
+import History from "./util/History"; // Import the History component
 
 export default function App() {
+  // Declare state variables
   const [calValue, setCalValue] = useState("");
   const [displayValue, setDisplayValue] = useState("");
   const [previewValue, setPreviewValue] = useState("");
   const [isAnswer, setIsAnswer] = useState(false);
   const [cursorSel, setCursorSel] = useState({ end: 0, start: 0 });
   const [isCursorSel, setIsCursorSel] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState([]); // State for calculation history
+  const [showHistory, setShowHistory] = useState(false); // State to toggle history view
 
   const ansColor = {
     color: isAnswer ? "orange" : "white",
   };
 
   useEffect(() => {
+    // Dismiss keyboard when the app starts
     Keyboard.dismiss();
 
+    // If there's an operation in the value, calculate the preview value
     if (valueHasOp(calValue)) {
       let prevAns = calculateResult(calValue);
       setPreviewValue(`${prevAns}`);
@@ -48,7 +49,34 @@ export default function App() {
       setIsAnswer(false);
     }
 
+    if (text === "+/-") {
+      if (calValue) {
+        const lastNumberMatch = calValue.match(/[-]?\d+(\.\d+)?$/);
+        if (lastNumberMatch) {
+          const lastNumber = lastNumberMatch[0];
+          const newNumber = (parseFloat(lastNumber) * -1).toString();
+          const updatedValue = calValue.slice(0, -lastNumber.length) + newNumber;
+          setCalValue(updatedValue);
+          setDisplayValue(updatedValue.replace(/\*/g, '×').replace(/\//g, '÷'));
+        }
+      }
+      return;
+    }
+
     let corrText = text === "X" ? "*" : text === "+/-" ? "-" : text;
+
+    // Handle percentage calculation for the last number
+    if (text === "%") {
+      if (calValue) {
+        const lastNumber = calValue.split(/[\+\-\*\/]/).pop();
+        const percentageValue = (parseFloat(lastNumber) / 100).toString();
+        setCalValue(calValue.slice(0, -lastNumber.length) + percentageValue);
+        setDisplayValue(calValue.slice(0, -lastNumber.length) + percentageValue);
+      }
+      return;
+    }
+
+    const displayText = text === "X" ? "×" : text === "/" ? "÷" : text;
 
     setCursorSel({ end: cursorSel.end + 1, start: cursorSel.start + 1 });
     setCalValue((prev) => {
@@ -64,13 +92,28 @@ export default function App() {
       if (prev.length !== cursorSel.end && isCursorSel) {
         let leftOver = prev.slice(0, cursorSel.end);
         let rightOver = prev.slice(cursorSel.end, prev.length);
-        return `${leftOver}${corrText}${rightOver}`;
+        return `${leftOver}${displayText}${rightOver}`;
       }
-      return prev + corrText;
+      return prev + displayText;
     });
   };
 
+  const handleParenthesis = () => {
+    // Count how many opening and closing parentheses are in the current calculation
+    const openParentheses = calValue.split("(").length - 1;
+    const closeParentheses = calValue.split(")").length - 1;
+
+    // If the number of open parentheses is greater than the number of closed ones, insert a closing parenthesis
+    if (openParentheses > closeParentheses) {
+      handlePress(")");
+    } else {
+      // Otherwise, insert an opening parenthesis
+      handlePress("(");
+    }
+  };
+
   const handleClear = () => {
+    // Clear the calculation and reset parentheses state
     setCalValue("");
     setDisplayValue("");
   };
@@ -82,18 +125,22 @@ export default function App() {
     setDisplayValue(result.replace(/\*/g, '×').replace(/\//g, '÷'));
     setPreviewValue("");
 
+    // Save to history
     setHistory((prev) => [...prev, { equation: calValue, answer: result }]);
     setIsAnswer(true);
   };
 
   const toggleHistory = () => {
+    // Toggle history visibility
     setShowHistory(!showHistory);
   };
 
   const clearHistory = () => {
+    // Clear calculation history
     setHistory([]);
   };
 
+  // Render the history component when the history view is active
   if (showHistory) {
     return (
       <History history={history} clearHistory={clearHistory} goBack={toggleHistory} />
@@ -102,61 +149,118 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
-      <View style={styles.screen}>
-        <TextInput
-          style={[styles.result, ansColor, { fontSize: width < 400 ? 50 : 70 }]} // Dynamic font size based on screen width
-          value={displayValue}
-          editable={false}
-          pointerEvents="none"
-        />
-        <TextInput
-          style={[styles.result, { fontSize: width < 400 ? 30 : 40 }]} // Smaller preview font
-          value={previewValue}
-          editable={false}
-          pointerEvents="none"
-        />
+      {/* Text input for displaying the current calculation */}
+      <TextInput
+        style={[styles.input, ansColor]}
+        value={displayValue}
+        onChangeText={setCalValue}
+        selection={cursorSel}
+        cursorColor='#8ad8d1'
+        autoFocus={true}
+        textAlign='right'
+        onSelectionChange={(e) => {
+          setIsCursorSel(true);
+          setCursorSel(e.nativeEvent.selection);
+        }}
+        showSoftInputOnFocus={false} // Prevent the keyboard from showing
+        editable={false} // Disable text input editing
+      />
+      {/* Text input for showing the preview of the result */}
+      <TextInput
+        value={previewValue}
+        onChangeText={setPreviewValue}
+        cursorColor='#8ad8d1'
+        textAlign='right'
+        caretHidden={true}
+        showSoftInputOnFocus={false} // Prevent the keyboard from showing
+        style={[styles.input, styles.prevInput]}
+        editable={false} // Disable text input editing
+      />
+
+      {/* Backspace and history buttons */}
+      <View style={styles.backButton}>
+        <Pressable onPress={toggleHistory}>
+          <Ionicons name='time' size={30} color="#505050" />
+        </Pressable>
+        <Pressable onPress={handleBackSpace} disabled={!calValue} style={styles.backspaceButton}>
+          <Ionicons
+            name='backspace'
+            size={30}
+            color={calValue ? "orange" : "#505050"}
+          />
+        </Pressable>
       </View>
 
-      {/* Add rows with buttons */}
+      <View style={styles.divider} />
+
+      {/* Button container for calculator */}
       <View style={styles.buttonContainer}>
         <Row>
-          <Button label="1" type="digit" handlePress={handlePress} />
-          <Button label="2" type="digit" handlePress={handlePress} />
-          <Button label="3" type="digit" handlePress={handlePress} />
-          <Button label="+" type="operatorPrimary" handlePress={handlePress} />
+          <Button handlePress={handleClear} label={"C"} type='operatorSecondary' />
+          <Button
+            handlePress={handleParenthesis}
+            label={"()"}
+            type='operatorSecondary'
+            icon={
+              <MaterialCommunityIcons
+                name='code-parentheses'
+                size={30}
+                style={{ fontWeight: "bold" }}
+              />
+            }
+          />
+          <Button handlePress={handlePress} label={"%"} type='operatorSecondary'
+            icon={<FontAwesome5 name='percent' size={21} />} />
+          <Button
+            handlePress={handlePress}
+            label={"/"}
+            type='operatorPrimary'
+            icon={<FontAwesome5 name='divide' size={21} />}
+          />
         </Row>
         <Row>
-          <Button label="4" type="digit" handlePress={handlePress} />
-          <Button label="5" type="digit" handlePress={handlePress} />
-          <Button label="6" type="digit" handlePress={handlePress} />
-          <Button label="-" type="operatorPrimary" handlePress={handlePress} />
+          <Button handlePress={handlePress} label={"7"} type='digit' />
+          <Button handlePress={handlePress} label={"8"} type='digit' />
+          <Button handlePress={handlePress} label={"9"} type='digit' />
+          <Button
+            handlePress={handlePress}
+            label={"X"}
+            type='operatorPrimary'
+            icon={<FontAwesome5 name='times' size={21} />}
+          />
         </Row>
         <Row>
-          <Button label="7" type="digit" handlePress={handlePress} />
-          <Button label="8" type="digit" handlePress={handlePress} />
-          <Button label="9" type="digit" handlePress={handlePress} />
-          <Button label="×" type="operatorPrimary" handlePress={handlePress} />
+          <Button handlePress={handlePress} label={"4"} type='digit' />
+          <Button handlePress={handlePress} label={"5"} type='digit' />
+          <Button handlePress={handlePress} label={"6"} type='digit' />
+          <Button
+            handlePress={handlePress}
+            label={"-"}
+            type='operatorPrimary'
+            icon={<FontAwesome name='minus' size={21} />}
+          />
         </Row>
         <Row>
-          <Button label="C" type="operatorSecondary" handlePress={handleClear} />
-          <Button label="0" type="digit" handlePress={handlePress} />
-          <Button label="=" type="equal" handlePress={handleEqual} />
-          <Button label="÷" type="operatorPrimary" handlePress={handlePress} />
+          <Button handlePress={handlePress} label={"1"} type='digit' />
+          <Button handlePress={handlePress} label={"2"} type='digit' />
+          <Button handlePress={handlePress} label={"3"} type='digit' />
+          <Button
+            handlePress={handlePress}
+            label={"+"}
+            type='operatorPrimary'
+            icon={<FontAwesome name='plus' size={21} />}
+          />
         </Row>
         <Row>
-          <Button label="(" type="operatorSecondary" handlePress={handlePress} />
-          <Button label=")" type="operatorSecondary" handlePress={handlePress} />
-          <Button label="%" type="operatorSecondary" handlePress={handlePress} />
-          <Button label="+/-" type="operatorSecondary" handlePress={handlePress} />
+          <Button handlePress={handlePress} label={"+/-"} type='digit' />
+          <Button handlePress={handlePress} label={"0"} type='digit' />
+          <Button handlePress={handlePress} label={"."} type='digit' />
+          <Button handlePress={handleEqual} label={"="} type='equal'
+            icon={<FontAwesome5 name='equals' size={21} />} />
         </Row>
-        <Text
-          style={styles.historyToggle}
-          onPress={toggleHistory}
-        >
-          {showHistory ? "Hide History" : "Show History"}
-        </Text>
       </View>
+
+      <StatusBar style='light' />
     </View>
   );
 }
@@ -164,34 +268,43 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
-    justifyContent: "center",
+    backgroundColor: "#17171a",
     alignItems: "center",
+    justifyContent: "flex-start",
   },
-  screen: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "flex-end",
-    width: "100%",
-    padding: 20,
-  },
-  result: {
+  input: {
+    height: 70,
     color: "white",
-    fontWeight: "bold",
+    width: "90%",
+    fontSize: 35,
     textAlign: "right",
-    width: "90%", // Ensure the width adjusts for screen size
+    marginTop: 80,
+  },
+  prevInput: {
+    color: "gray",
+    fontSize: 25,
+    height: 50,
+  },
+  backButton: {
+    width: "90%",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  backspaceButton: {
+    paddingHorizontal: 20,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#333",
+    width: "90%",
+    marginVertical: 15,
   },
   buttonContainer: {
     flex: 1,
-    justifyContent: "space-between",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 20,
-  },
-  historyToggle: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 20,
+    width: "90%",
+    justifyContent: "flex-start",
   },
 });
