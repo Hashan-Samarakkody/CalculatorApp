@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   prevInput: {
     color: "#757574",
     fontSize: 30,
-    height: 50,
+    height: 40,
   },
   backButton: {
     width: "95%",
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 0.9,
     width: "95%",
-    marginBottom: 30,
+    marginBottom: 40,
     justifyContent: "flex-end",
   },
 });
