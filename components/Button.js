@@ -5,7 +5,7 @@ import React from "react";
 const { width } = Dimensions.get('window');
 
 // Define dynamic button size based on screen width
-const BUTTON_SIZE = width < 350 ? 50 : 75; // Make buttons smaller on small screens
+const BUTTON_SIZE = width < 350 ? 50 : 80; // Make buttons smaller on small screens
 
 const colorMapping = {
     equal: {

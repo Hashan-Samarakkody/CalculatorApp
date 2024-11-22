@@ -300,11 +300,11 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#333",
     width: "90%",
-    marginVertical: 50,
+    marginVertical: 35,
   },
   buttonContainer: {
-    flex: 1,
-    width: "90%",
-    justifyContent: "flex-start",
+    flex: 0.9,
+    width: "95%",
+    justifyContent: "flex-end",
   },
 });
