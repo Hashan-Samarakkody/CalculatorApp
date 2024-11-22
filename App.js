@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   backspaceButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
   },
   divider: {
     height: 1,
     backgroundColor: "#333",
     width: "90%",
-    marginVertical: 15,
+    marginVertical: 50,
   },
   buttonContainer: {
     flex: 1,
