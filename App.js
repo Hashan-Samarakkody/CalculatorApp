@@ -10,17 +10,18 @@ import History from "./util/History"; // Import the History component
 
 export default function App() {
   // Declare state variables
-  const [calValue, setCalValue] = useState("");
-  const [displayValue, setDisplayValue] = useState("");
-  const [previewValue, setPreviewValue] = useState("");
-  const [isAnswer, setIsAnswer] = useState(false);
-  const [cursorSel, setCursorSel] = useState({ end: 0, start: 0 });
-  const [isCursorSel, setIsCursorSel] = useState(false);
-  const [history, setHistory] = useState([]); // State for calculation history
-  const [showHistory, setShowHistory] = useState(false); // State to toggle history view
+  const [calValue, setCalValue] = useState("");  // Stores the current calculation value
+  const [displayValue, setDisplayValue] = useState("");  // Stores the display value for the calculator screen
+  const [previewValue, setPreviewValue] = useState("");  // Stores the preview result (before pressing equal)
+  const [isAnswer, setIsAnswer] = useState(false);  // Determines if the result is an answer (used to highlight answer)
+  const [cursorSel, setCursorSel] = useState({ end: 0, start: 0 });  // Stores cursor position for text input
+  const [isCursorSel, setIsCursorSel] = useState(false);  // Checks if cursor selection is active
+  const [history, setHistory] = useState([]);  // State for storing calculation history
+  const [showHistory, setShowHistory] = useState(false);  // State to toggle history view
 
+  // Answer display color change based on whether it's the final result
   const ansColor = {
-    color: isAnswer ? "orange" : "white",
+    color: isAnswer ? "orange" : "white",  // Orange when result, white when not
   };
 
   useEffect(() => {
@@ -29,27 +30,30 @@ export default function App() {
 
     // If there's an operation in the value, calculate the preview value
     if (valueHasOp(calValue)) {
-      let prevAns = calculateResult(calValue);
-      setPreviewValue(`${prevAns}`);
+      let prevAns = calculateResult(calValue);  // Calculate result for preview
+      setPreviewValue(`${prevAns}`);  // Set preview value
     } else {
-      setPreviewValue(``);
+      setPreviewValue(``);  // Clear preview if no operation
     }
-  }, [calValue]);
+  }, [calValue]);  // Trigger this effect whenever the calculation value changes
 
   const handleBackSpace = () => {
+    // Handle the backspace button, removing one character from the calculation
     const remainValue = calValue.slice(0, calValue.length - 1);
     setCalValue(remainValue);
-    setDisplayValue(remainValue.replace(/\*/g, '×').replace(/\//g, '÷'));
+    setDisplayValue(remainValue.replace(/\*/g, '×').replace(/\//g, '÷'));  // Replace operators for better display
   };
 
   const handlePress = (text) => {
     if (isAnswer) {
+      // If the result has been shown, reset the calculation on new input
       setCalValue("");
       setDisplayValue("");
       setIsAnswer(false);
     }
 
     if (text === "+/-") {
+      // Handle toggling the sign of the last number
       if (calValue) {
         const lastNumberMatch = calValue.match(/[-]?\d+(\.\d+)?$/);
         if (lastNumberMatch) {
@@ -80,6 +84,7 @@ export default function App() {
 
     setCursorSel({ end: cursorSel.end + 1, start: cursorSel.start + 1 });
     setCalValue((prev) => {
+      // Insert the operator or number at the correct cursor position
       if (prev.length !== cursorSel.end && isCursorSel) {
         let leftOver = prev.slice(0, cursorSel.end);
         let rightOver = prev.slice(cursorSel.end, prev.length);
@@ -89,6 +94,7 @@ export default function App() {
     });
 
     setDisplayValue((prev) => {
+      // Insert the operator or number at the correct cursor position in the display
       if (prev.length !== cursorSel.end && isCursorSel) {
         let leftOver = prev.slice(0, cursorSel.end);
         let rightOver = prev.slice(cursorSel.end, prev.length);
@@ -99,12 +105,12 @@ export default function App() {
   };
 
   const handleParenthesis = () => {
-    // Count how many opening and closing parentheses are in the current calculation
+    // Toggle parentheses based on the current calculation
     const openParentheses = calValue.split("(").length - 1;
     const closeParentheses = calValue.split(")").length - 1;
 
-    // If the number of open parentheses is greater than the number of closed ones, insert a closing parenthesis
     if (openParentheses > closeParentheses) {
+      // If there are more opening parentheses, insert a closing parenthesis
       handlePress(")");
     } else {
       // Otherwise, insert an opening parenthesis
@@ -113,30 +119,31 @@ export default function App() {
   };
 
   const handleClear = () => {
-    // Clear the calculation and reset parentheses state
+    // Clear the calculation and reset display
     setCalValue("");
     setDisplayValue("");
   };
 
   const handleEqual = () => {
+    // Calculate the result when "=" is pressed
     if (!calValue) return;
     const result = calculateResult(calValue);
     setCalValue(result);
     setDisplayValue(result.replace(/\*/g, '×').replace(/\//g, '÷'));
     setPreviewValue("");
 
-    // Save to history
+    // Save the current equation and result to history
     setHistory((prev) => [...prev, { equation: calValue, answer: result }]);
-    setIsAnswer(true);
+    setIsAnswer(true);  // Mark that the result is shown
   };
 
   const toggleHistory = () => {
-    // Toggle history visibility
+    // Toggle visibility of history view
     setShowHistory(!showHistory);
   };
 
   const clearHistory = () => {
-    // Clear calculation history
+    // Clear the calculation history
     setHistory([]);
   };
 
@@ -266,25 +273,29 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  // Styles for the main container
   container: {
     flex: 1,
     backgroundColor: "#17171a",
     alignItems: "center",
     justifyContent: "flex-start",
   },
+  // Styles for the text input
   input: {
-    height: 70,
+    height: 55,
     color: "white",
     width: "90%",
     fontSize: 45,
     textAlign: "right",
     marginTop: 75,
   },
+  // Styles for the preview text input
   prevInput: {
     color: "#757574",
     fontSize: 30,
     height: 40,
   },
+  // Styles for the back button container
   backButton: {
     width: "95%",
     paddingHorizontal: 5,
@@ -293,15 +304,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 0,
   },
+  // Styles for the backspace button
   backspaceButton: {
     paddingHorizontal: 5,
   },
+  // Styles for the divider line
   divider: {
     height: 1,
     backgroundColor: "#333",
     width: "90%",
     marginVertical: 25,
   },
+  // Styles for the button container
   buttonContainer: {
     flex: 0.9,
     width: "95%",

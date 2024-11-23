@@ -1,6 +1,14 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 
+/**
+ * Renders a list of calculations from the history array and provides
+ * a Clear History button and a Back to Calculator button.
+ *
+ * @param {array} history - array of objects, each with an equation and an answer
+ * @param {function} clearHistory - function to clear the history array
+ * @param {function} goBack - function to go back to the calculator
+ */
 const History = ({ history, clearHistory, goBack }) => {
     return (
         <View style={styles.container}>

@@ -7,6 +7,7 @@ const { width } = Dimensions.get('window');
 // Define dynamic button size based on screen width
 const BUTTON_SIZE = width < 350 ? 50 : 80; // Make buttons smaller on small screens
 
+// Define button colors
 const colorMapping = {
     equal: {
         backgroundColor: "orange",
@@ -30,9 +31,11 @@ const colorMapping = {
     },
 };
 
+// Button component
 export default function Button({ label, type, handlePress, icon }) {
     const { backgroundColor, textColor, iconColor } = colorMapping[type] || colorMapping.digit;
 
+    // Return button component
     return (
         <TouchableHighlight
             underlayColor={backgroundColor}
