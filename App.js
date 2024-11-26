@@ -18,6 +18,12 @@ import Row from "./components/Row";
 import { valueHasOp, calculateResult } from './util/logic';
 import History from "./util/History";
 
+/**
+ * The main calculator application component.
+ * It includes the logic for handling the calculator operations and rendering the calculator UI.
+ * @param {Object} props - The component props.
+ * @returns {JSX.Element} The JSX element representing the calculator UI.
+ */
 export default function App() {
 	// Declare state variables
 	const [calValue, setCalValue] = useState("");  // Stores the current calculation value
@@ -47,6 +53,12 @@ export default function App() {
 		}
 	}, [calValue]);  // Trigger this effect whenever the calculation value changes
 
+	/**
+	 * Handles the backspace button, removing one character from the calculation.
+	 * It takes the current calculation value and slices it to remove the last character.
+	 * The resulting value is then set as the new calculation value and display value.
+	 * The operators are replaced with their respective symbols for better display.
+	 */
 	const handleBackSpace = () => {
 		// Handle the backspace button, removing one character from the calculation
 		const remainValue = calValue.slice(0, calValue.length - 1);
@@ -54,6 +66,13 @@ export default function App() {
 		setDisplayValue(remainValue.replace(/\*/g, '×').replace(/\//g, '÷'));  // Replace operators for better display
 	};
 
+	/**
+	 * Handles the press of a button, updating the calculation and display value as needed.
+	 * If the result has been shown, it resets the calculation on new input.
+	 * It also handles toggling the sign of the last number and percentage calculation of the last number.
+	 * The operators are replaced with their respective symbols for better display.
+	 * The function also handles the cursor position to insert the operator or number at the correct place.
+	 */
 	const handlePress = (text) => {
 		if (isAnswer) {
 			// If the result has been shown, reset the calculation on new input
@@ -116,6 +135,11 @@ export default function App() {
 		});
 	};
 
+	/**
+	 * Toggle parentheses based on the current calculation.
+	 * If there are more opening parentheses, insert a closing parenthesis.
+	 * Otherwise, insert an opening parenthesis.
+	 */
 	const handleParenthesis = () => {
 		// Toggle parentheses based on the current calculation
 		const openParentheses = calValue.split("(").length - 1;
@@ -130,12 +154,24 @@ export default function App() {
 		}
 	};
 
+
+	/**
+	 * Clear the calculation and reset display.
+	 * This function is called when the clear button is pressed.
+	 * It sets the calculation value and display value to empty strings.
+	 */
 	const handleClear = () => {
 		// Clear the calculation and reset display
 		setCalValue("");
 		setDisplayValue("");
 	};
 
+
+	/**
+	 * Handles the "=" button press to calculate and display the result of the current calculation.
+	 * It updates the calculation and display values with the result, clears the preview value,
+	 * saves the current equation and result to history, and marks the result as shown.
+	 */
 	const handleEqual = () => {
 		// Calculate the result when "=" is pressed
 		if (!calValue) return;
@@ -149,11 +185,24 @@ export default function App() {
 		setIsAnswer(true);  // Mark that the result is shown
 	};
 
+
+	/**
+	 * Toggle visibility of history view.
+	 * This function is called when the user presses the "History" button.
+	 * It toggles the showHistory state variable, which determines whether the
+	 * history view is visible or not.
+	 */
 	const toggleHistory = () => {
 		// Toggle visibility of history view
 		setShowHistory(!showHistory);
 	};
 
+
+	/**
+	 * Clear the calculation history.
+	 * This function is called when the user presses the "Clear History" button.
+	 * It resets the history state variable to an empty array, effectively clearing the history.
+	 */
 	const clearHistory = () => {
 		// Clear the calculation history
 		setHistory([]);
