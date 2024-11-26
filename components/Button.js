@@ -1,5 +1,5 @@
 /*
-    File Name: App.js
+    File Name: Button.js
     Author: S.D.S.H. Samarakkodi
     Student ID: IM/2021/007
     Description: This file contains the button component for the calculator app.

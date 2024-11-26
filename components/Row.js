@@ -1,5 +1,5 @@
 /*
-    File Name: App.js
+    File Name: Row.js
     Author: S.D.S.H. Samarakkodi
     Student ID: IM/2021/007
     Description: This file contains the row component for the calculator app.

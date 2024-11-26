@@ -1,5 +1,5 @@
 /*
-    File Name: App.js
+    File Name: History.js
     Author: S.D.S.H. Samarakkodi
     Student ID: IM/2021/007
     Description: This file contains the history component for the calculator app.
