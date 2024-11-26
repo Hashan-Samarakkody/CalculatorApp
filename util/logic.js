@@ -1,3 +1,13 @@
+/*
+    File Name: logic.js
+    Author: S.D.S.H. Samarakkodi
+    Student ID: IM/2021/007
+    Description: This file contains the logic for the calculator app.
+    Date Created: 2024-09-05
+*/
+
+
+// Import mathjs for evaluating expressions
 import { evaluate } from 'mathjs';
 
 // Check if value has operator

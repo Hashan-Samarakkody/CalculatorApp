@@ -1,3 +1,12 @@
+/*
+    File Name: App.js
+    Author: S.D.S.H. Samarakkodi
+    Student ID: IM/2021/007
+    Description: This file contains the button component for the calculator app.
+    Date Created: 2024-09-05
+*/
+
+// Import necessary modules
 import { TouchableHighlight, Text, StyleSheet, Dimensions } from "react-native";
 import React from "react";
 
